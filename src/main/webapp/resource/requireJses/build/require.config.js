@@ -1,0 +1,1 @@
+requirejs.config({baseUrl:"/mytest/resource/requireJses/demo05",paths:{jquery:"../js/jquery",bootstrap:"./bootstrap/js/bootstrap",css:"../require/css",text:"../require/text",app:"./app","css-builder":"../require/css-builder",normalize:"../require/normalize"},shim:{bootstrap:["jquery"]}});

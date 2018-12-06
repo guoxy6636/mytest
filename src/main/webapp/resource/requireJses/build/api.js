@@ -1,0 +1,1 @@
+define(["jquery"],function(e){return{getUser:function(){var r=e.Deferred();return require(["user"],function(e){r.resolve(e)}),r},loadUser:function(){require(["text!/mytest/jsp/requireJses/user.html!strip"],function(r){e("#userInfo").html(r)})}}});

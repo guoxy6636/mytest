@@ -1,0 +1,89 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:tx="http://www.springframework.org/schema/tx"
+       xmlns:aop="http://www.springframework.org/schema/aop"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans
+                        http://www.springframework.org/schema/beans/spring-beans-4.2.xsd
+                        http://www.springframework.org/schema/tx
+                        http://www.springframework.org/schema/tx/spring-tx.xsd
+                        http://www.springframework.org/schema/aop http://www.springframework.org/schema/aop/spring-aop-4.2.xsd">
+
+
+    <!-- 连接池 -->
+    <bean id = "dataSource" class = "org.apache.commons.dbcp.BasicDataSource" destroy-method = "close">
+        <property name="driverClassName" value="${jdbc.driver}" />
+        <property name="url" value="${jdbc.url}" />
+        <property name="username" value="${jdbc.username}" />
+        <property name="password" value="${jdbc.password}" />
+        <!-- 初始化连接大小 -->
+        <property name="initialSize" value="${jdbc.initialSize}" />
+        <!-- 连接池最大数量 -->
+        <property name="maxActive" value="${jdbc.maxActive}"/>
+        <!-- 连接池最大空闲 -->
+        <property name="maxIdle" value="${jdbc.maxIdle}" />
+        <!-- 连接池最小空闲 -->
+        <property name="minIdle" value="${jdbc.minIdle}" />
+        <!-- 获取连接最大等待时间 -->
+        <property name="maxWait" value="${jdbc.maxWait}" />
+    </bean>
+
+    <!-- 由spring管理 sqlSessionFactory -->
+    <bean id = "sqlSessionFactory" class="org.mybatis.spring.SqlSessionFactoryBean">
+        <property name="dataSource" ref="dataSource" />
+        <!-- 自动扫描mapping.xml文件 -->
+        <property name = "mapperLocations" value="classpath:mapper/*.xml" />
+    </bean>
+
+    <!-- 自动扫描mapper.xml及mapper接口 -->
+    <bean class = "org.mybatis.spring.mapper.MapperScannerConfigurer">
+        <property name = "basePackage" value="akl.dao" />
+        <property name = "sqlSessionFactoryBeanName" value = "sqlSessionFactory" />
+    </bean>
+
+
+    <!-- 事务管理器 -->
+    <bean id="transactionManager"
+          class="org.springframework.jdbc.datasource.DataSourceTransactionManager">
+        <!-- 数据源 -->
+        <property name="dataSource" ref="dataSource" />
+    </bean>
+
+    <!-- 使用注解定义事务 -->
+    <!--<tx:annotation-driven transaction-manager = "transactionManager" />-->
+
+    <!-- 通知 -->
+    <tx:advice id="txAdvice" transaction-manager="transactionManager">
+        <tx:attributes>
+            <!--<tx:method name="*" isolation="DEFAULT"-->
+            <!--propagation="REQUIRED" no-rollback-for="java.lang.RuntimeException" timeout="100"/>-->
+            <!--<tx:method name="*" read-only="true"/>-->
+            <!-- 以方法为单位,指定方法应用什么事务属性 isolation:隔离级别 propagation:传播行为 read-only:是否只读 -->
+            <!--PROPAGATION_REQUIRED：支持当前事务，如果当前没有事务，就新建一个事务。这是最常见的选择。-->
+            <!--PROPAGATION_SUPPORTS：支持当前事务，如果当前没有事务，就以非事务方式执行。-->
+            <!--PROPAGATION_MANDATORY：支持当前事务，如果当前没有事务，就抛出异常。-->
+            <!--PROPAGATION_REQUIRES_NEW：新建事务，如果当前存在事务，把当前事务挂起。-->
+            <!--PROPAGATION_NOT_SUPPORTED：以非事务方式执行操作，如果当前存在事务，就把当前事务挂起。-->
+            <!--PROPAGATION_NEVER：以非事务方式执行，如果当前存在事务，则抛出异常。-->
+            <!--PROPAGATION_NESTED：支持当前事务，如果当前事务存在，则执行一个嵌套事务，如果当前没有事务，就新建一个事务。-->
+
+            <!-- 传播行为 -->
+            <tx:method name="save*" propagation="REQUIRED" />
+            <tx:method name="insert*" propagation="REQUIRED" />
+            <tx:method name="add*" propagation="REQUIRED" />
+            <tx:method name="create*" propagation="REQUIRED" />
+            <tx:method name="delete*" propagation="REQUIRED" />
+            <tx:method name="update*" propagation="REQUIRED" />
+            <tx:method name="find*" propagation="SUPPORTS" read-only="true" />
+            <tx:method name="select*" propagation="SUPPORTS" read-only="true" />
+            <tx:method name="get*" propagation="SUPPORTS" read-only="true" />
+        </tx:attributes>
+    </tx:advice>
+
+    <!-- 切面 -->
+    <aop:config>
+        <aop:advisor advice-ref="txAdvice"
+                     pointcut="execution(* akl.service.*.*(..))" />
+    </aop:config>
+
+</beans>

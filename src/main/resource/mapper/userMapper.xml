@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="akl.dao.UserMapper">
+
+    <resultMap type="akl.entity.User" id="userInfo">
+        <id column="user_id" property="userId"/>
+        <result column="username" property="username"/>
+        <result column="gender" property="gender"/>
+        <result column="year" property="year"/>
+        <result column="area_name" property="areaName"/>
+        <result column="email" property="email"/>
+        <result column="phone" property="phone"/>
+    </resultMap>
+
+    <select id="pageFind" resultMap="userInfo">
+        SELECT
+        u.user_id, u.username, u.gender, u.area_name,u.`year`, u.phone, u.email
+        FROM t_user u
+        <where>
+            <if test="user.gender != null and user.gender!='' ">
+                and u.gender = #{user.gender}
+            </if>
+            <if test="user.username != null and user.username!='' ">
+                and u.username LIKE '%${user.username}%'
+            </if>
+        </where>
+        LIMIT ${(currPage-1)*pageSize},${pageSize}
+    </select>
+
+    <select id="totalCount" resultType="int">
+        SELECT
+        count(user_id)
+        FROM t_user u
+        <where>
+            <if test="user.gender != null and user.gender!='' ">
+                and u.gender = #{user.gender}
+            </if>
+            <if test="user.username != null and user.username!='' ">
+                and u.username LIKE '%${user.username}%'
+            </if>
+        </where>
+    </select>
+</mapper>
